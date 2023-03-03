@@ -5,21 +5,24 @@ This is a basic implementation of denoising diffusion probabilistic models ([Ho 
 The model was trained for 300 epochs. Example image generations are shown below. While it isn't state-of-the-art we still show that it's outputting images which almost look like dogs. There are some artefacts like noise and checkerboard pattern (due to transposed convs). With some further improvements to the model, we expect this to do better.
 
 **Training images**:
-
+<p float="left">
 <img src="docs/d0.png" width="128">
 <img src="docs/d1.png" width="128">
 <img src="docs/d2.png" width="128">
 <img src="docs/d3.png" width="128">
+</p>
 
+<p float="left">
 <img src="docs/d4.png" width="128">
 <img src="docs/d5.png" width="128">
 <img src="docs/d6.png" width="128">
 <img src="docs/d7.png" width="128">
+</p>
 
 <br>
 
 **Generated images**:
-
+<p float="left">
 <img src="diffusion_dogs/plots/sample45_final.png" width="64">
 <img src="diffusion_dogs/plots/sample44_final.png" width="64">
 <img src="diffusion_dogs/plots/sample43_final.png" width="64">
@@ -28,6 +31,7 @@ The model was trained for 300 epochs. Example image generations are shown below.
 <img src="diffusion_dogs/plots/sample183_final.png" width="64">
 <img src="diffusion_dogs/plots/sample294_final.png" width="64">
 <img src="diffusion_dogs/plots/sample204_final.png" width="64">
+</p>
 
 <br>
 
@@ -36,7 +40,7 @@ The model was trained for 300 epochs. Example image generations are shown below.
 Setup environment
 ```
 python -m venv .venv
-.venv/bin/activate
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 Generate 3 images with filenames sample{i}
