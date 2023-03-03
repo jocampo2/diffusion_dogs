@@ -6,7 +6,7 @@ import numpy as np
 import torch.nn.functional as F
 
 IMG_SIZE = 64
-T = 300
+T = 300  # timesteps
 
 
 def linear_beta_schedule(timesteps: int, start: float = 0.0001, end: float = 0.02):
