@@ -1,17 +1,22 @@
-import torch
-from utils import plot_sample_images
-from model import SimpleUnet
+from utils import plot_sample_images, get_device
+from model import load_model
+import argparse
 
-if torch.cuda.is_available():
-    device = "cuda"
-elif torch.backends.mps.is_available():
-    device = "mps"
-else:
-    device = "cpu"
+if __name__ == "__main__":
 
-model = SimpleUnet()
-model.load_state_dict(
-    torch.load("weights/diffusion_model.pt", map_location=torch.device(device))
-)
-model.to(device)
-plot_sample_images(model, device)
+    # Command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--fname", help="File name of generated image", default="plots/sample"
+    )
+    parser.add_argument("-n", help="Generate n images", type=int)
+    args = parser.parse_args()
+
+    # Load the model and generate the images
+    device = get_device()
+    model = load_model(device)
+    if args.n:
+        for i in range(args.n):
+            plot_sample_images(model, device, fname=args.fname + str(i))
+    else:
+        plot_sample_images(model, device, fname=args.fname)

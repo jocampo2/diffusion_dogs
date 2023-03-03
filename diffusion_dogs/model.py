@@ -4,7 +4,16 @@ import math
 
 
 class Block(nn.Module):
-    def __init__(self, in_ch, out_ch, time_emb_dim, up=False):
+    """Down or Up block used in the UNet with a time embedding added on.
+
+    Args:
+        in_ch: no. of input channels
+        out_ch: no. of output channels
+        time_emb_dim: Number of time embedding features
+        up: True if up sampling else False
+    """
+
+    def __init__(self, in_ch: int, out_ch: int, time_emb_dim: int, up: bool = False):
         super().__init__()
         self.time_mlp = nn.Linear(time_emb_dim, out_ch)
         if up:
@@ -20,8 +29,8 @@ class Block(nn.Module):
 
     def forward(
         self,
-        x,
-        t,
+        x: torch.Tensor,
+        t: torch.Tensor,
     ):
         # First Conv
         h = self.bnorm1(self.relu(self.conv1(x)))
@@ -38,24 +47,27 @@ class Block(nn.Module):
 
 
 class SinusoidalPositionEmbeddings(nn.Module):
-    def __init__(self, dim):
+    """Positional embeddings concatenated onto the UNet
+    see https://machinelearningmastery.com/a-gentle-introduction-to-positional-encoding-in-transformer-models-part-1
+    """
+
+    def __init__(self, dim: int):
         super().__init__()
         self.dim = dim
 
-    def forward(self, time):
+    def forward(self, time: torch.Tensor):
         device = time.device
         half_dim = self.dim // 2
         embeddings = math.log(10000) / (half_dim - 1)
         embeddings = torch.exp(torch.arange(half_dim, device=device) * -embeddings)
         embeddings = time[:, None] * embeddings[None, :]
         embeddings = torch.cat((embeddings.sin(), embeddings.cos()), dim=-1)
-        # TODO: Double check the ordering here
         return embeddings
 
 
 class SimpleUnet(nn.Module):
     """
-    A simplified variant of the Unet architecture.
+    A simplified variant of the Unet architecture with a time embedding added on in each block.
     """
 
     def __init__(self):
@@ -93,7 +105,7 @@ class SimpleUnet(nn.Module):
 
         self.output = nn.Conv2d(up_channels[-1], 3, out_dim)
 
-    def forward(self, x, timestep):
+    def forward(self, x: torch.Tensor, timestep: torch.Tensor):
         # Embedd time
         t = self.time_mlp(timestep)
         # Initial conv
@@ -109,3 +121,14 @@ class SimpleUnet(nn.Module):
             x = torch.cat((x, residual_x), dim=1)
             x = up(x, t)
         return self.output(x)
+
+
+def load_model(device: str, weights_file: str = "weights/diffusion_model.pt"):
+    """Loads the model weights onto the UNet
+    Returns:
+        nn.Module"""
+
+    model = SimpleUnet()
+    model.load_state_dict(torch.load(weights_file, map_location=torch.device(device)))
+    model.to(device)
+    return model
